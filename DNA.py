@@ -14,8 +14,12 @@ codon = {
 
 }
 for i in range(len(DNA)//3):
-    if DNA[i:i+3] in codon:
-        codon[DNA[i*3:i*3+3]]+=1
+    start=i*3
+    end=start+3
+
+    piece=DNA[start:end]
+    if piece in codon:
+        codon[piece]+=1
     else:
-        codon[DNA[i*3:i*3+3]]=1
+        codon[piece]=1
 print(codon)
