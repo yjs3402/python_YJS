@@ -20,11 +20,11 @@ class Student:
     def __ne__(self, value):
         return self.get_sum() != value.get_sum()
     def __gt__(self, value):
-        return self.get_sum() > value.get_sum()
+        return self.get_sum() >   value.get_sum()
     def __ge__(self, value):
         return self.get_sum() >= value.get_sum()
     def __lt__(self, value):
-        return self.get_sum() < value.get_sum()v
+        return self.get_sum() <  value.get_sum()
     def __le__(self, value):
         return self.get_sum() <= value.get_sum()
 
@@ -37,6 +37,12 @@ students = [
     Student("윤명월", 64, 88, 92, 92),
 ]
 
-print("이름", "총점ㅁ", "평균", sep="\t")
-for student in students:
-    print(student.to_string())
+student_a = Student("윤인성", 87, 98, 88, 95)
+student_b = Student("연하진", 92, 98, 96, 98)
+
+print("student_a == student_b = ", student_a == student_b)
+print("student_a != student_b = ", student_a != student_b)
+print("student_a >  student_b = ", student_a >  student_b)
+print("student_a >= student_b = ", student_a >= student_b)
+print("student_a <  student_b = ", student_a <  student_b)
+print("student_a <= student_b = ", student_a <= student_b)
