@@ -1,11 +1,12 @@
 import time
 import random
 
-class Attacking:
+class SpecialAttack:
+    def __init__(self):
+        pass
+class NormalAttack:
     def __init__(self, hp, damage, defense):
-        self.__hp = hp
-        self.__damage = damage
-        self.__defense = 1 - defense / 100
+        pass
     def attack(self):
         return self.damage * self.critical()
     def attacked(self, myname, damage):  
@@ -25,11 +26,13 @@ class Attacking:
         return random.randrange(5)
     def printhp(self, myname, beforehp, damage):
         print("입힌데미지 {}".format(damage))
-        print("{} hp: {} >> {}".format(myname, beforehp, self.__hp))
+        print("{} hp: {} >> {}".format(myname, beforehp, self.hp))
 
-class Player(Attacking):
+class Player(NormalAttack):
     def __init__(self, hp, damage, defense):
-        super().__init__(hp, damage, defense)
+        self.hp = hp
+        self.damage = damage
+        self.defense = defense / 100
         
 def input_status(stat):
     print("{} 스탯".format(stat))
@@ -49,14 +52,14 @@ while(P1.hp > 0 and P2.hp > 0):
     print("P1 공격")
     P2.attacked("P2", P1.attack())
     print()
-    time.sleep(0)
+    time.sleep(4)
     print("P2 공격")
     P1.attacked("P1", P2.attack())
     print()
-    time.sleep(0)
+    time.sleep(4)
     print("P1 hp: {}  P2 hp: {}".format(P1.hp, P2.hp))
     print("-----------\n")
-    time.sleep(0)
+    time.sleep(2)
     
 if(P1.hp <= 0 and P2.hp <= 0):
     print("DRAW")
