@@ -31,12 +31,12 @@ class Object:
 class SpecialAttack(Object):
     def __init__(self):
         self.noattack = 0
-    def spc_attack(self):
-        return self.damage * 7
-
+    def spc_attack(self):    
+        return self.damage * 5
 class Player(SpecialAttack):
     def __init__(self, name, hp, damage, defense):
-        super().__init__(name, hp, damage, defense)
+        Object.__init__(self, name, hp, damage, defense)
+        SpecialAttack.__init__(self)
     def attacktype(self, att_type, target):
         if att_type == "x":
             print("공격을 하지않았습니다")
@@ -45,7 +45,11 @@ class Player(SpecialAttack):
             target.attacked(target.name, self.attack())
         elif att_type == "spc":
             if self.noattack >= 4:
-                target.spc_attacked(self.spc_attack())
+                target.spc_attacked(target.name, self.spc_attack())
+                self.noattack -= 4
+            else:
+                print("궁게이지가 4 미만입니다. 현재 궁게이지:", self.noattack)
+                input_att_type(self, target)
         else:
             print("o, x, spc 중에 입력하시오")
             input_att_type(self, target)
@@ -98,19 +102,19 @@ def input_att_type(cls1, cls2):
 # 체력, 데미지, 방어력 직접입력
 # 치명타: 1/10확률로 데미지 두배
 # 회피율: 1/10확률로 무효
-# 공격4번 안하면 스킬(데미지 7배)
+# 공격4번 안하면 스킬(데미지 5배, 방어력 영향x)
 name, hp, damage, defense = input_status("P1")
 P1 = Player(name, hp, damage, defense)
-name, hp,damage, defense = input_status("P2")
-P2 = Player(hp,damage, defense)
+name, hp, damage, defense = input_status("P2")
+P2 = Player(name, hp, damage, defense)
 while(P1.hp > 0 and P2.hp > 0):
     print()
-    print("P1 공격")
+    print(P1.name, "공격")
     input_att_type(P1, P2)
 
     sleep(0)
     print()
-    print("P2 공격")
+    print(P2.name, "공격")
     input_att_type(P2, P1)
 
     sleep(0)
