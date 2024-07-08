@@ -1,7 +1,7 @@
 from time import sleep
 import random
         
-class Object:
+class Stat:
     def __init__(self, name, hp, damage, defense):
         self.name = name
         self.__hp = hp
@@ -28,14 +28,20 @@ class Object:
     def defense(self, value):
         self.__defense = value
 
-class SpecialAttack(Object):
+class SpecialAttack(Stat):
     def __init__(self):
         self.noattack = 0
     def spc_attack(self):    
         return self.damage * 5
+    
+# 체력, 데미지, 방어력 직접입력
+# 치명타: 1/10확률로 데미지 두배
+# 회피율: 1/10확률로 무효
+# 공격4번 안하면 스킬(데미지 5배, 방어력 영향x)
+
 class Player(SpecialAttack):
     def __init__(self, name, hp, damage, defense):
-        Object.__init__(self, name, hp, damage, defense)
+        Stat.__init__(self, name, hp, damage, defense)
         SpecialAttack.__init__(self)
     def attacktype(self, att_type, target):
         if att_type == "x":
@@ -87,8 +93,63 @@ class Player(SpecialAttack):
             print("궁극기데미지 {}".format(damage))
         print("{} hp: {} >> {}".format(myname, beforehp, self.hp))
 
+class monster(Stat):
+    def __init__(self, difficulty):
+        if difficulty == "easy":
+            self.difficulty_easy()
+        if difficulty == "normal":
+            self.difficulty_normal()
+        if difficulty == "hard":
+            self.difficulty_hard()
+        if difficulty == "veryhard":
+            self.difficulty_veryhard()
+    def difficulty_easy(self):
+        pass
+    def difficulty_normal(self):
+        pass
+    def difficulty_hard(self):
+        pass
+    def difficulty_veryhard(self):
+        pass
+    def mon_soldier_knife(self, hp, damage):
+        pass
+    def mon_soldier_gun(self,):
+        pass
+    def mon_tanker(self):
+        pass
+    def mon_tanker_metal(self):
+        pass
+    def mon_witch(self):
+        pass
+    def mon_boss(self):
+        pass
 
-        
+def input_battletype():
+    while(1):
+        battletype = input("대결 방식을 선택하시오 \nm : 몬스터와 대결\nu : 유저와 1대1\np : 파티 구성하여 대결\n 입력> ")
+        if battletype == 'm':
+            fight_with_monster()
+            break
+        elif battletype == 'u':
+            fight_with_user()
+            break
+        elif battletype == 'p':
+            fight_with_party()
+            break
+        else:
+            print(" (m, u, p)중에 입력")
+
+def fight_with_monster():
+    while(1):
+        difficulty = input("난이도 선택(easy, normal, hard, veryhard) > ")
+        if difficulty == "easy":
+            monster(difficulty)
+        else:
+            print(" (m, u, p)중에 입력")
+
+def fight_with_party():
+    pass
+
 def input_status(stat):
     print("{} 스탯".format(stat))
     name = input("name을 입력 > ")
@@ -99,33 +160,30 @@ def input_status(stat):
 def input_att_type(cls1, cls2):
     att_type = input("공격 유형(o, x, spc) > ")
     cls1.attacktype(att_type, cls2)
-# 체력, 데미지, 방어력 직접입력
-# 치명타: 1/10확률로 데미지 두배
-# 회피율: 1/10확률로 무효
-# 공격4번 안하면 스킬(데미지 5배, 방어력 영향x)
-name, hp, damage, defense = input_status("P1")
-P1 = Player(name, hp, damage, defense)
-name, hp, damage, defense = input_status("P2")
-P2 = Player(name, hp, damage, defense)
-while(P1.hp > 0 and P2.hp > 0):
-    print()
-    print(P1.name, "공격")
-    input_att_type(P1, P2)
+def fight_with_user():
+    name, hp, damage, defense = input_status("P1")
+    P1 = Player(name, hp, damage, defense)
+    name, hp, damage, defense = input_status("P2")
+    P2 = Player(name, hp, damage, defense)
+    while(P1.hp > 0 and P2.hp > 0):
+        print()
+        print(P1.name, "공격")
+        input_att_type(P1, P2)
 
-    sleep(0)
-    print()
-    print(P2.name, "공격")
-    input_att_type(P2, P1)
+        sleep(0)
+        print()
+        print(P2.name, "공격")
+        input_att_type(P2, P1)
 
-    sleep(0)
-    print()
-    print("P1 hp: {}  P2 hp: {}".format(P1.hp, P2.hp))
-    print("-------------------------")
-    sleep(0)
-    
-if(P1.hp <= 0 and P2.hp <= 0):
-    print("DRAW")
-elif(P1.hp <= 0):
-    print("P2 WIN")
-elif(P2.hp <= 0):
-    print("P1 WIN")
+        sleep(0)
+        print()
+        print("P1 hp: {}  P2 hp: {}".format(P1.hp, P2.hp))
+        print("-------------------------")
+        sleep(0)
+        
+    if(P1.hp <= 0 and P2.hp <= 0):
+        print("DRAW")
+    elif(P1.hp <= 0):
+        print("P2 WIN")
+    elif(P2.hp <= 0):
+        print("P1 WIN")
