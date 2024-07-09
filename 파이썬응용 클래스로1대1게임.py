@@ -13,8 +13,7 @@ class Stat:
         self.__defense = 1 - defense / 100
     def attack(self):
         return self.__damage
-    def show_figure(self, figure, namelist, ):
-
+    
     @property
     def hp(self):
         return self.__hp
@@ -39,7 +38,8 @@ class SpecialAttack(Stat):
         self.noattack = 0
     def spc_attack(self):    
         return self.damage * 5
-    
+
+# 한턴에 한번움직이고 한번 공격
 # 체력, 데미지, 방어력 직접입력
 # 치명타: 1/10확률로 데미지 두배
 # 회피율: 1/10확률로 무효
@@ -117,6 +117,26 @@ class monster(Stat):
         pass
     def mon_boss(self, name, hp, damage):
         pass
+apperance = {
+    "P" : "▶",
+    "SK": "△",
+    "SG": "▽",
+    "T" : "○",
+    "TM": "◎",
+    "W" : "◈",
+    "BS": "▣"
+}
+def show_figure(self, namelist, figure, field_size):
+    print("▢" * field_size)
+    for i in len(namelist):
+        print("┼" * (figure[i]-1))
+        print(apperance[namelist[i]])
+
+    print("▥" * field_size)
+
+def input_att_type(cls1, cls2):
+    att_type = input("공격 유형(o, x, spc) > ")
+    cls1.attacktype(att_type, cls2)
 
 def input_battletype():
     while True:
@@ -155,12 +175,13 @@ def fight_with_monster():
             print(" 다시 입력")
 
 def fight_with_monster_tutorial():
+    name = input("name을 입력 > ")
     player = Player(name, 1000000, 1000000, 100)
+    SK1 = monster("SK", 100, 10, 0)
     print("WAVE 1")
-    SK1 = monster("S_K", 100, 10, 0)
     print("검사: 거리가 0일때 타격하는 기본 몹이다")
-    
-    input_att_type(P1, )
+
+
 def fight_with_party():
     pass
 
@@ -171,9 +192,7 @@ def input_status(stat):
     damage = int(input("damage를 입력 > "))
     defense = int(input("defense를 입력 > "))
     return name, hp, damage, defense
-def input_att_type(cls1, cls2):
-    att_type = input("공격 유형(o, x, spc) > ")
-    cls1.attacktype(att_type, cls2)
+
 def fight_with_user():
     name, hp, damage, defense = input_status("P1")
     P1 = Player(name, hp, damage, defense)
