@@ -127,9 +127,9 @@ apperance = {
     "BS": "▣"
 }
 def show_figure(self, namelist, figure, field_size):
-    print("▢" * field_size)
+    print("▥" * field_size)
     for i in len(namelist):
-        print("┼" * (figure[i]-1))
+        print("▢" * (figure[i]-1))
         print(apperance[namelist[i]])
 
     print("▥" * field_size)
