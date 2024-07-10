@@ -11,6 +11,16 @@ class Stat:
         self.__hp = hp
         self.__damage = damage
         self.__defense = 1 - defense / 100
+        self.__location = 0
+    def move(self, direction):
+        if direction == 'a':
+            self.__location -= 1
+            return
+        elif direction == 'd':
+            self.__location += 1
+            return
+        elif direction == 's' or direction == 'w':
+            return 
     def attack(self):
         return self.__damage
     
@@ -32,6 +42,13 @@ class Stat:
     @defense.setter
     def defense(self, value):
         self.__defense = value
+    @property
+    def location(self):
+        return self.__location
+    @location.setter
+    def location(self, value):
+        self.__location = value
+    
 
 class SpecialAttack(Stat):
     def __init__(self):
@@ -104,19 +121,21 @@ class Player(SpecialAttack):
 class monster(Stat):
     def __init__(self, name, hp, damage, defense):
         super().__init__(name, hp, damage, defense)
-
+        self.__attackrange = 0
+    def move(self):
+        super().move("a")
     def mon_soldier_knife(self, name, hp, damage):
-        pass
+        self.__attackrange = 1
     def mon_soldier_gun(self, name, hp, damage):
-        pass
+        self.__attackrange = 3
     def mon_tanker(self, name, hp, damage):
-        pass
+        self.__attackrange = 1
     def mon_tanker_metal(self, name, hp, damage):
-        pass
+        self.__attackrange = 1
     def mon_witch(self, name, hp, damage):
-        pass
+        self.__attackrange = 4
     def mon_boss(self, name, hp, damage):
-        pass
+        self.__attackrange = 1000000
 apperance = {
     "P" : "▶",
     "SK": "△",
@@ -124,15 +143,23 @@ apperance = {
     "T" : "○",
     "TM": "◎",
     "W" : "◈",
-    "BS": "▣"
+    "BS": "▣",
+    ""  : ""
 }
-def show_figure(self, namelist, figure, field_size):
-    print("▥" * field_size)
-    for i in len(namelist):
-        print("▢" * (figure[i]-1))
-        print(apperance[namelist[i]])
+def show_figure(field_size, namelist, *location):
+    for i in range(len(namelist)):
+        print("▢" * (location[i] - location[i-1] - 1), end = '')
+        print(apperance[namelist[i]], end = '')
+    print("▢" * (field_size - location[len(location)-2]))
 
-    print("▥" * field_size)
+
+def set_location(namelist, *locat):
+    for i in range(len(namelist)):
+        namelist[i].location = locat[i]
+def move_location():
+    pass
+
+
 
 def input_att_type(cls1, cls2):
     att_type = input("공격 유형(o, x, spc) > ")
@@ -178,8 +205,16 @@ def fight_with_monster_tutorial():
     name = input("name을 입력 > ")
     player = Player(name, 1000000, 1000000, 100)
     SK1 = monster("SK", 100, 10, 0)
+    SK1.mon_soldier_knife()
     print("WAVE 1")
-    print("검사: 거리가 0일때 타격하는 기본 몹이다")
+    print("검사: 거리가 1일때 타격하는 기본 몹이다(제일 만만하다!)")
+    set_location([player, SK1], 2,5)
+    field_size = 6
+    show_figure(field_size, ["P", "SK"], player.location, SK1.location, 0)
+    sleep(1)
+    show_figure(field_size, ["P", "SK"], player.location, SK1.location, 0)
+    sleep(1)
+    show_figure(field_size, ["P", "SK"], player.location, SK1.location, 0)
 
 
 def fight_with_party():
@@ -203,16 +238,16 @@ def fight_with_user():
         print(P1.name, "공격")
         input_att_type(P1, P2)
 
-        sleep(0)
+        sleep(2)
         print()
         print(P2.name, "공격")
         input_att_type(P2, P1)
 
-        sleep(0)
+        sleep(2)
         print()
         print("P1 hp: {}  P2 hp: {}".format(P1.hp, P2.hp))
         print("-------------------------")
-        sleep(0)
+        sleep(2)
         
     if(P1.hp <= 0 and P2.hp <= 0):
         print("DRAW")
