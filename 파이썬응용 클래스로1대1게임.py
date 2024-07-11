@@ -98,7 +98,7 @@ class Player(SpecialAttack):
                 print("o, x, spc 중에 입력하시오")
                 input_att_type(self, target_type, target)
         elif target_type == 'm':
-
+            pass
     def miss(self):
         rand = random.randrange(10)
         if rand == 0:
@@ -131,25 +131,25 @@ class Player(SpecialAttack):
         elif att_type == "spc":
             print("궁극기데미지 {}".format(damage))
         print(self.name, "{}/{}".format(self.nowhp,self.starthp))
-        hprate = (self.nowhp / self.starthp * 10)
-        print("█" * hprate, "⎕" * (10 - hprate))
+        hprate = int((self.nowhp / self.starthp) * 10)
+        print("█ " * hprate, "⎕ " * (10 - hprate))
 
 class Monster(Stat):
     def __init__(self, name, hp, damage, defense, mon_type):
         super().__init__(name, hp, damage, defense)
         self.__mon_type = mon_type
         if self.__mon_type == "SK":
-            def mon_soldier_knife()
+            self.mon_soldier_knife()
         elif self.__mon_type == "SG":
-            def mon_soldier_gun()
+            self.mon_soldier_gun()
         elif self.__mon_type == "T":
-            def mon_tanker()
+            self.mon_tanker()
         elif self.__mon_type == "TM":
-            def mon_tanker_metal()
+            self.mon_tanker_metal()
         elif self.__mon_type == "W":
-            def mon_witch()
+            self.mon_witch()
         elif self.__mon_type == "B":
-            def mon_boss()
+            self.mon_boss()
     def move(self):
         super().move('a')
     def can_move(self, front_loc):
@@ -162,14 +162,14 @@ class Monster(Stat):
             elif att_type == "spc":
                 print("궁극기데미지 {}".format(damage))
             print(self.name, "{}/{}".format(self.nowhp,self.starthp))
-            hprate = (self.nowhp / self.starthp * 10)
-            print("█" * hprate, "⎕" * (10 - hprate))
+            hprate = (self.nowhp * 10) // self.starthp
+            print("█ " * hprate, "⎕ " * (10 - hprate))
         elif isTM =='o':
             attacked_TM()
     def attacked_TM(self):
         self.nowhp -= 1
         print(self.name, "{}/{}".format(self.nowhp,self.starthp))
-        print("█" * self.nowhp, "⎕" * (self.starthp - self.nowhp))
+        print("█ " * self.nowhp, "⎕ " * (self.starthp - self.nowhp))
     def mon_soldier_knife(self):
         self.attackrange = 1
     def mon_soldier_gun(self):
@@ -203,10 +203,10 @@ def show_figure(field_size, namelist):
             print("▢" * (n.location - 1), end = '')
         else:
             print("▢" * (n.location - namelist[i-1].location - 1), end = '')
-        if type(n) == Player
-            print(apperance[n], end = '')
+        if type(n) == Player:
+            print(apperance[type(n)], end = '')
         else:
-            print(apperance[n][n.mon_type], end = '')
+            print(apperance[type(n)][n.mon_type], end = '')
     print("▢" * (field_size - namelist[len(namelist)-1].location))
 
 
@@ -215,8 +215,9 @@ def set_location(namelist, *locat):
         namelist[i].location = locat[i]
 def turn_act(player, monlist, whose_turn):
     if whose_turn == 'p':
-        i.input_move()
-    elif: whose_turn =='m'
+        player.input_move()
+        input_att_type(player, 'm', monlist)
+    elif whose_turn =='m':
         totaldamage = 0
         for i in range(len(monlist)):
             front_loc = monlist[i-1].location
@@ -224,8 +225,7 @@ def turn_act(player, monlist, whose_turn):
                 front_loc = 0
             if monlist[i].can_attack(player, monlist[i]):
                 totaldamage += monlist[i].damage
-            else:
-                if monlist[i].can_move():
+            elif monlist[i].can_move(front_loc):
                     monlist[i].move()
         player.attacked_by_mon(totaldamage)
 
@@ -237,15 +237,19 @@ def input_att_type(cls1, target_type, *cls2):
     elif target_type == 'm':
         att_type = input("공격 유형(o, x, spc) > ")
         if att_type == 'o':
-            can_attack_list = []
-            can_attack_namelist = []
-            for i in cls2:
-                if cls1.can_attack(cls1, i):
-                    can_attack_list.append(i)
-                    can_attack_namelist.append(i.name)
-            choose_target = input("타겟 설정", can_attack_namelist, "입력 > ")
-
-
+            if not(cls1.can_attack(cls1, cls2[0])):
+                print("공격할 수 있는 타겟이 없슴다")
+                input_att_type(cls1, target_type, cls2)
+            else:
+                can_attack_list = []
+                can_attack_namelist = []
+                for i in cls2:
+                    if cls1.can_attack(cls1, i):
+                        can_attack_list.append(i)
+                        can_attack_namelist.append(i.name)
+                choose_target = input("타겟 설정", can_attack_namelist, "입력 > ")
+        elif att_type == 'x':
+            
 
 def input_battletype():
     while True:
@@ -269,24 +273,24 @@ def fight_with_monster():
             fight_with_monster_tutorial()
             break
         elif difficulty == "easy":
-            monster.difficulty_easy
+            pass
             break
         elif difficulty == "normal":
-            monster.difficulty_normal
+            pass
             break
         elif difficulty == "hard":
-            monster.difficulty_hard
+            pass
             break
         elif difficulty == "veryhard":
-            monster.difficulty_veryhard
+            pass
             break
         else:
             print(" 다시 입력")
 
 def fight_with_monster_tutorial():
     name = input("name을 입력 > ")
-    player = Player(name, 1000000, 1000000, 1000000)
-    SK = monster("SK", 100, 10, 0, "SK")
+    player = Player(name, 1000000, 1000000, 0)
+    SK = Monster("SK", 100, 100, 0, "SK")
     monlist = [SK]
     alllist = [player] + monlist
     print("WAVE 1")
@@ -298,7 +302,11 @@ def fight_with_monster_tutorial():
         sleep(0.7)
         turn_act(player, monlist, 'm')
         show_figure(field_size, alllist)
+    sleep(10000)
     print("공격받았다. 반격!")
+    turn_act(player, monlist, 'p')
+
+
 
 
 def fight_with_party():
