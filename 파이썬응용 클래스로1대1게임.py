@@ -27,6 +27,14 @@ class Stat:
         return self.__damage
     def can_attack(self, cls1, cls2):
         return (cls2.location - cls1.location) <= self.__attackrange
+    def printhp(self, damage, att_type):
+        if att_type == "o":
+            print("입은데미지 {}".format(damage))
+        elif att_type == "spc":
+            print("궁극기데미지 {}".format(damage))
+        print(self.name, "{}/{}".format(self.nowhp,self.starthp))
+        hprate = int((self.nowhp / self.starthp) * 10)
+        print("█ " * hprate, "⎕ " * (10 - hprate))
     @property
     def nowhp(self):
         return self.__nowhp
@@ -98,7 +106,21 @@ class Player(SpecialAttack):
                 print("o, x, spc 중에 입력하시오")
                 input_att_type(self, target_type, target)
         elif target_type == 'm':
-            pass
+            if att_type == "x":
+                print("공격을 하지않았습니다")
+                self.noattack += 1
+            elif att_type == "o":
+                target.attacked(self.attack())
+            elif att_type == "spc":
+                if self.noattack >= 4:
+                    target.spc_attacked(self.spc_attack())
+                    self.noattack -= 4
+                else:
+                    print("궁게이지가 4 미만입니다. 현재 궁게이지:", self.noattack)
+                    input_att_type(self, target_type, target)
+            else:
+                print("o, x, spc 중에 입력하시오")
+                input_att_type(self, target_type, target)
     def miss(self):
         rand = random.randrange(10)
         if rand == 0:
@@ -125,14 +147,6 @@ class Player(SpecialAttack):
     def attacked_by_mon(self, damage):
         self.nowhp -= damage * self.defense
         self.printhp(damage, "o")
-    def printhp(self, damage, att_type):
-        if att_type == "o":
-            print("입은데미지 {}".format(damage))
-        elif att_type == "spc":
-            print("궁극기데미지 {}".format(damage))
-        print(self.name, "{}/{}".format(self.nowhp,self.starthp))
-        hprate = int((self.nowhp / self.starthp) * 10)
-        print("█ " * hprate, "⎕ " * (10 - hprate))
 
 class Monster(Stat):
     def __init__(self, name, hp, damage, defense, mon_type):
@@ -157,13 +171,7 @@ class Monster(Stat):
     def attacked(self, damage, att_type, isTM):
         if isTM == 'x':
             self.nowhp -= damage
-            if att_type == "o":
-                print("입은데미지 {}".format(damage))
-            elif att_type == "spc":
-                print("궁극기데미지 {}".format(damage))
-            print(self.name, "{}/{}".format(self.nowhp,self.starthp))
-            hprate = (self.nowhp * 10) // self.starthp
-            print("█ " * hprate, "⎕ " * (10 - hprate))
+            printhp(damage, att_type)
         elif isTM =='o':
             attacked_TM()
     def attacked_TM(self):
@@ -230,7 +238,7 @@ def turn_act(player, monlist, whose_turn):
         player.attacked_by_mon(totaldamage)
 
 
-def input_att_type(cls1, target_type, *cls2):
+def input_att_type(cls1, target_type, cls2):
     if target_type == 'p':
         att_type = input("공격 유형(o, x, spc) > ")
         cls1.attacktype(att_type, target_type, cls2)
@@ -248,7 +256,14 @@ def input_att_type(cls1, target_type, *cls2):
                         can_attack_list.append(i)
                         can_attack_namelist.append(i.name)
                 choose_target = input("타겟 설정", can_attack_namelist, "입력 > ")
-        elif att_type == 'x':
+        elif att_type == 'spc':
+            for i in cls2:
+                if i.mon_type != "TM":
+                    cls1.attacktype(att_type, target_type, i)
+                else:
+                    pass
+        else:
+            pass
             
 
 def input_battletype():
@@ -302,7 +317,7 @@ def fight_with_monster_tutorial():
         sleep(0.7)
         turn_act(player, monlist, 'm')
         show_figure(field_size, alllist)
-    sleep(10000)
+    sleep(1)
     print("공격받았다. 반격!")
     turn_act(player, monlist, 'p')
 
