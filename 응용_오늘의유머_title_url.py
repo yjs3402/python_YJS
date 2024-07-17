@@ -19,5 +19,5 @@ for i in range(count):
 
     title_end = source_data.find('</a>')
     title = source_data[:title_end]
-    print(title)
-    print('https://www.todayhumor.co.kr' + article_url)
+    print(i+1, title)
+    print('\thttps://www.todayhumor.co.kr' + article_url)
