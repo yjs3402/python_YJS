@@ -2,7 +2,6 @@ import requests
 import time
 import os
 
-int a= 10
 headers = {'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gekco'}
 for i in range(100):
     page_folder = f"C:/Users/c403/Documents/GitHub/python_YJS/todayhumor/todayhumer_page{str(i+1)}"
