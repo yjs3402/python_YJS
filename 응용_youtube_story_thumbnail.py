@@ -31,7 +31,6 @@ last_height = driver.execute_script("return document.documentElement.scrollHeigh
 
 already_loaded = 0
 titles = []
-links = []
 while True:
     driver.execute_script("window.scrollTo(0, document.documentElement.scrollHeight);")
     time.sleep(3)
@@ -41,21 +40,16 @@ while True:
     for el in range(already_loaded,len(elem)):
         thumbnail = elem[el].get_attribute('src')
         title = titles_links[el].get_attribute('title')
-        link = titles_links[el].get_attribute('href')
         error_text = ['\\','/',':','*','?','"','<','>','.']
         for k in error_text:
             if title.find(k) != -1:
                 title = title.replace(k, "", len(title))
         titles.append(title)
-        links.append(link)
         print(thumbnail)
         print(title)
-        page_folder = f"./youtube_thumbnail/{title}"
-        if not os.path.exists(page_folder):
-            os.mkdir(page_folder)
         
         try:
-            file_name=  f'./youtube_thumbnail/{title}/{title}.jpg'
+            file_name=  f'./youtube_thumbnail/{title}.jpg'
             ss = requests.get(thumbnail, headers=headers)
             file = open(file_name, 'wb')
             file.write(ss.content)
