@@ -26,7 +26,6 @@ driver = webdriver.Chrome(options=option)
 driver.get(url)
 driver.implicitly_wait(3)
 
-actions = driver.find_element(By.CSS_SELECTOR,'body')
 last_height = driver.execute_script("return document.documentElement.scrollHeight")
 
 already_loaded = 0
@@ -42,14 +41,15 @@ while True:
         thumbnail = elem[el].get_attribute('src')
         title = titles_links[el].get_attribute('title')
         link = titles_links[el].get_attribute('href')
-        error_text = ['\\','/',':','*','?','"','<','>']
+        error_text = ['\\','/',':','*','?','"','<','>','.']
         for k in error_text:
             if title.find(k) != -1:
                 title = title.replace(k, "", len(title))
         titles.append(title)
-        links.append(title)
+        links.append(link)
         print(thumbnail)
         print(title)
+        print(link)
         page_folder = f"./youtube_thumbnail/{title}"
         if not os.path.exists(page_folder):
             os.mkdir(page_folder)
@@ -68,3 +68,21 @@ while True:
         break
     last_height = new_height
     
+for li in range(len(links)):
+    driver.get(links[li])
+    for i in range(2):
+        driver.execute_script("window.scrollTo(0, document.documentElement.scrollHeight);")
+        time.sleep(3)
+    names = driver.find_elements(By.ID, 'author-text')
+    texts = driver.find_elements(By.CLASS_NAME,'yt-core-attributed-string.yt-core-attributed-string--white-space-pre-wrap')[1:]
+    for profile in range(len(names)):
+        name_url = names[profile].get_attribute('href')
+        name = name_url.find('/@')
+        name_url = name_url[name + 2:]
+        text = texts[profile].text
+
+        comment_txt = open(f"./youtube_thumbnail/{titles[li]}/{name_url}.txt",'w')
+        comment_txt.write(text)
+        comment_txt.close()
+        
+        
