@@ -33,14 +33,17 @@ titles = []
 links = []
 while True:
     driver.execute_script("window.scrollTo(0, document.documentElement.scrollHeight);")
-    time.sleep(3)
+    time.sleep(5)
     new_height = driver.execute_script("return document.documentElement.scrollHeight")
-    elem = driver.find_elements(By.CLASS_NAME, 'yt-core-image yt-core-image--fill-parent-height yt-core-image--fill-parent-width yt-core-image--content-mode-scale-aspect-fill yt-core-image--loaded'.replace(' ','.'))
-    titles_links = driver.find_elements(By.ID, 'video-title-link')
-    for el in range(already_loaded,len(elem)):
-        thumbnail = elem[el].get_attribute('src')
-        title = titles_links[el].get_attribute('title')
-        link = titles_links[el].get_attribute('href')
+    video = driver.find_elements(By.ID, 'dismissible')
+    now_loaded = driver.find_elements(By.CLASS_NAME, 'yt-core-image yt-core-image--fill-parent-height yt-core-image--fill-parent-width yt-core-image--content-mode-scale-aspect-fill yt-core-image--loaded'.replace(' ','.'))
+    for video_num in range(already_loaded, len(now_loaded)):
+        elem = video[video_num].find_element(By.CLASS_NAME, 'yt-core-image yt-core-image--fill-parent-height yt-core-image--fill-parent-width yt-core-image--content-mode-scale-aspect-fill yt-core-image--loaded'.replace(' ','.'))
+        title_link = video[video_num].find_element(By.ID, 'video-title-link')
+        
+        thumbnail = elem.get_attribute('src')
+        title = title_link.get_attribute('title')
+        link = title_link.get_attribute('href')
         error_text = ['\\','/',':','*','?','"','<','>','.']
         for k in error_text:
             if title.find(k) != -1:
@@ -63,7 +66,7 @@ while True:
         except Exception as e:
             print('에러발생 :',e)
         time.sleep(1)
-    already_loaded = len(elem)
+    already_loaded = len(now_loaded)
     if new_height == last_height:
         break
     last_height = new_height
