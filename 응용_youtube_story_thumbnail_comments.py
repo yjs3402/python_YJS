@@ -70,10 +70,10 @@ while True:
     
 for li in range(len(links)):
     driver.get(links[li])
-    driver.implicitly_wait(3)
+    driver.implicitly_wait(5)
     for i in range(2):
         driver.execute_script("window.scrollTo(0, document.documentElement.scrollHeight);")
-        time.sleep(3)
+        time.sleep(10)
     time.sleep(10)
     names = driver.find_elements(By.ID, 'author-text')
     texts = driver.find_elements(By.CLASS_NAME,'yt-core-attributed-string.yt-core-attributed-string--white-space-pre-wrap')[1:]
@@ -83,7 +83,7 @@ for li in range(len(links)):
         name_url = name_url[name + 2:]
         text = texts[profile].text
 
-        comment_txt = open(f"./youtube_thumbnail/{titles[li]}/{name_url}.txt", 'w', encoding='UTF-8')
+        comment_txt = open(f"./youtube_thumbnail/{titles[li]}/{profile}{name_url}.txt", 'w', encoding='UTF-8')
         comment_txt.write(text)
         comment_txt.close()
         
