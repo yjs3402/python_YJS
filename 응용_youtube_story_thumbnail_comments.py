@@ -36,8 +36,8 @@ while True:
     time.sleep(5)
     new_height = driver.execute_script("return document.documentElement.scrollHeight")
     video = driver.find_elements(By.ID, 'dismissible')
-    now_loaded = driver.find_elements(By.CLASS_NAME, 'yt-core-image yt-core-image--fill-parent-height yt-core-image--fill-parent-width yt-core-image--content-mode-scale-aspect-fill yt-core-image--loaded'.replace(' ','.'))
-    for video_num in range(already_loaded, len(now_loaded)):
+    now_loaded = len(driver.find_elements(By.CLASS_NAME, 'yt-core-image yt-core-image--fill-parent-height yt-core-image--fill-parent-width yt-core-image--content-mode-scale-aspect-fill yt-core-image--loaded'.replace(' ','.')))
+    for video_num in range(already_loaded, now_loaded):
         elem = video[video_num].find_element(By.CLASS_NAME, 'yt-core-image yt-core-image--fill-parent-height yt-core-image--fill-parent-width yt-core-image--content-mode-scale-aspect-fill yt-core-image--loaded'.replace(' ','.'))
         title_link = video[video_num].find_element(By.ID, 'video-title-link')
         
@@ -66,7 +66,7 @@ while True:
         except Exception as e:
             print('에러발생 :',e)
         time.sleep(1)
-    already_loaded = len(now_loaded)
+    already_loaded =    now_loaded
     if new_height == last_height:
         break
     last_height = new_height
