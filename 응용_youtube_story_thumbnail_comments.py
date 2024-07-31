@@ -35,41 +35,37 @@ while True:
     driver.execute_script("window.scrollTo(0, document.documentElement.scrollHeight);")
     time.sleep(5)
     new_height = driver.execute_script("return document.documentElement.scrollHeight")
-    video = driver.find_elements(By.ID, 'dismissible')
-    now_loaded = len(driver.find_elements(By.CLASS_NAME, 'yt-core-image yt-core-image--fill-parent-height yt-core-image--fill-parent-width yt-core-image--content-mode-scale-aspect-fill yt-core-image--loaded'.replace(' ','.')))
-    for video_num in range(already_loaded, now_loaded):
-        elem = video[video_num].find_element(By.CLASS_NAME, 'yt-core-image yt-core-image--fill-parent-height yt-core-image--fill-parent-width yt-core-image--content-mode-scale-aspect-fill yt-core-image--loaded'.replace(' ','.'))
-        title_link = video[video_num].find_element(By.ID, 'video-title-link')
-        
-        thumbnail = elem.get_attribute('src')
-        title = title_link.get_attribute('title')
-        link = title_link.get_attribute('href')
-        error_text = ['\\','/',':','*','?','"','<','>','.']
-        for k in error_text:
-            if title.find(k) != -1:
-                title = title.replace(k, "", len(title))
-        titles.append(title)
-        links.append(link)
-        print(thumbnail)
-        print(title)
-        print(link)
-        page_folder = f"./youtube_thumbnail/{title}"
-        if not os.path.exists(page_folder):
-            os.mkdir(page_folder)
-        
-        try:
-            file_name=  f'./youtube_thumbnail/{title}/{title}.jpg'
-            ss = requests.get(thumbnail, headers=headers)
-            file = open(file_name, 'wb')
-            file.write(ss.content)
-            file.close()
-        except Exception as e:
-            print('에러발생 :',e)
-        time.sleep(1)
-    already_loaded =    now_loaded
     if new_height == last_height:
         break
     last_height = new_height
+
+video = driver.find_elements(By.ID, 'dismissible')
+for video_num in range(len(video)):
+    print(video_num+1, end=' ')
+    elem = video[video_num].find_element(By.CLASS_NAME, 'yt-core-image yt-core-image--fill-parent-height yt-core-image--fill-parent-width yt-core-image--content-mode-scale-aspect-fill yt-core-image--loaded'.replace(' ','.'))
+    title_link = video[video_num].find_element(By.ID, 'video-title-link')
+    thumbnail = elem.get_attribute('src')
+    title = title_link.get_attribute('title')
+    link = title_link.get_attribute('href')
+    error_text = ['\\','/',':','*','?','"','<','>','.']
+    for k in error_text:
+        if title.find(k) != -1:
+            title = title.replace(k, "", len(title))
+    titles.append(title)
+    links.append(link)
+    print(title)
+    page_folder = f"./youtube_thumbnail/{title}"
+    if not os.path.exists(page_folder):
+            os.mkdir(page_folder)
+    try:
+        file_name=  f'./youtube_thumbnail/{title}/{title}.jpg'
+        ss = requests.get(thumbnail, headers=headers)
+        file = open(file_name, 'wb')
+        file.write(ss.content)
+        file.close()
+    except Exception as e:
+        print('에러발생 :',e)
+    time.sleep(1)
     
 for li in range(len(links)):
     driver.get(links[li])
@@ -90,4 +86,4 @@ for li in range(len(links)):
         comment_txt.write(text)
         comment_txt.close()
         
-        
+    
