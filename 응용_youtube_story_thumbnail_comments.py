@@ -32,7 +32,8 @@ already_loaded = 0
 titles = []
 links = []
 while True:
-    driver.execute_script("window.scrollTo(0, document.documentElement.scrollHeight);")
+    actions = driver.find_element(By.CSS_SELECTOR, 'body')
+    actions.send_keys(Keys.END)
     time.sleep(5)
     new_height = driver.execute_script("return document.documentElement.scrollHeight")
     if new_height == last_height:
@@ -71,7 +72,8 @@ for li in range(len(links)):
     driver.get(links[li])
     driver.implicitly_wait(5)
     for i in range(2):
-        driver.execute_script("window.scrollTo(0, document.documentElement.scrollHeight);")
+        actions = driver.find_element(By.CSS_SELECTOR, 'body')
+        actions.send_keys(Keys.END)
         time.sleep(10)
     time.sleep(10)
     names = driver.find_elements(By.ID, 'author-text')
