@@ -13,43 +13,63 @@ import pyperclip
 import requests
 import os
 
-subprocess.Popen(r'C:\Program Files\Google\Chrome\Application\chrome.exe --remote-debugging-port=9222 --user-data-dir="C:\chromeCookie')
-headers = {'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gekco'}
+def click_block(block):
+    block.click()
+    driver.implicitly_wait(3)
+def start_chrome():
+    subprocess.Popen(r'C:\Program Files\Google\Chrome\Application\chrome.exe --remote-debugging-port=9222 --user-data-dir="C:\chromeCookie')
+    headers = {'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gekco'}
 
-option = Options()
-option.add_experimental_option("debuggerAddress", "127.0.0.1:9222")
+    option = Options()
+    option.add_experimental_option("debuggerAddress", "127.0.0.1:9222")
+    return option
+def open_site(driver, url):
+    driver.get(url)
+    driver.implicitly_wait(3)
+def delete_error_text(name):
+    error_text = ['\\','/',':','*','?','"','<','>','.']
+    for k in error_text:
+        if name.find(k) != -1:
+            name = name.replace(k, "")
+    return name
+            
+def youtube_choose_category(driver, text):
+    category = driver.find_elements(By.CLASS_NAME, 'style-scope yt-chip-cloud-chip-renderer'.replace(' ','.'))
+    for i in range(len(category)):
+        if category[i].text == text:
+            choosed_category = category[i]
+            break
+    return choosed_category
+
+option = start_chrome()
+
 #driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=option)
-
 driver = webdriver.Chrome(options=option)
 
-url = 'https://www.youtube.com'
-driver.get(url)
-driver.implicitly_wait(3)
+open_site(driver, 'https://www.youtube.com')
 
-category = driver.find_elements(By.CLASS_NAME, 'style-scope yt-chip-cloud-chip-renderer'.replace(' ','.'))
-for i in range(len(category)):
-    if category[i].text == '최근에 업로드된 동영상':
-        recently_uploaded = category[i]
-        break
-
-recently_uploaded.click()
-driver.implicitly_wait(3)
+recently_uploaded = youtube_choose_category(driver, '최근에 업로드된 동영상')
+click_block(recently_uploaded)
 
 chaneol_count = int(input("탐색할 채널 개수 입력> "))
 video_count = int(input("채널당 탐색할 영상 개수 입력> "))
-chaneol = driver.find_elements(By.ID, 'avatar-link')
-while len(chaneol) < chaneol_count:
+
+chaneols = driver.find_elements(By.ID, 'avatar-link')
+chaneol_names = []
+chaneol_sites = []
+while len(chaneols) < chaneol_count:
     actions = driver.find_element(By.CSS_SELECTOR, 'body')
     actions.send_keys(Keys.PAGE_DOWN)
     time.sleep(3)
-    chaneol = driver.find_elements(By.ID, 'avatar-link')
-chaneol_names = []
-chaneol_sites = []
+    chaneols = driver.find_elements(By.ID, 'avatar-link')
 for i in range(chaneol_count):
-    chaneol_name = chaneol[i].get_attribute('title')
-    chaneol_site = chaneol[i].get_attribute('href')
+    chaneol_name = chaneols[i].get_attribute('title')
+    chaneol_name = delete_error_text(chaneol_name)
+    chaneol_site = chaneols[i].get_attribute('href')
+    
     chaneol_names.append(chaneol_name)
     chaneol_sites.append(chaneol_site)
+    
     page_folder = f"./youtube_thumbnail/{chaneol_name}"
     if not os.path.exists(page_folder):
         os.mkdir(page_folder)
@@ -75,11 +95,8 @@ for i in range(chaneol_count):
         title_link = video[video_num].find_element(By.ID, 'video-title-link')
         thumbnail = elem.get_attribute('src')
         title = title_link.get_attribute('title')
+        title = delete_error_text(title)
         link = title_link.get_attribute('href')
-        error_text = ['\\','/',':','*','?','"','<','>','.']
-        for k in error_text:
-            if title.find(k) != -1:
-                title = title.replace(k, "")
         titles.append(title)
         links.append(link)
         print(title)
