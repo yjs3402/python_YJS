@@ -13,13 +13,15 @@ import pyperclip
 import requests
 import os
 
-elems = {
+elem_attri = {
     'y프로필-이름-링크' : ['avatar-link', 'title', 'href'],
     'y프로필-사진' : ['yt-core-image yt-spec-avatar-shape__image yt-core-image--fill-parent-height yt-core-image--fill-parent-width yt-core-image--content-mode-scale-to-fill yt-core-image--loaded'.replace(' ','.'), 'src'],
     'y카테고리' : ['style-scope yt-chip-cloud-chip-renderer'.replace(' ','.')],
     'y영상' : ['dismissible'],
     'y영상-썸네일' : ['yt-core-image yt-core-image--fill-parent-height yt-core-image--fill-parent-width yt-core-image--content-mode-scale-aspect-fill yt-core-image--loaded'.replace(' ','.') , 'src'],
-    'y영상-제목-링크' : ['video-title-link', 'title', 'href']
+    'y영상-제목-링크' : ['video-title-link', 'title', 'href'],
+    'y댓글-이름' : ['author-text', 'href'],
+    'y댓글-텍스트' : ['yt-core-attributed-string yt-core-attributed-string--white-space-pre-wrap'.replace(' ','.')]
 }
 # 블록 클릭
 def click_block(block):
@@ -46,7 +48,7 @@ def del_err_txt(name):
     return name
 # 유튜브 원하는 카테고리 들어가기
 def youtube_choose_category(driver, text):
-    category = driver.find_elements(By.CLASS_NAME, elems['y카테고리'][0])
+    category = driver.find_elements(By.CLASS_NAME, elem_attri['y카테고리'][0])
     for i in range(len(category)):
         if category[i].text == text:
             choosed_category = category[i]
@@ -73,16 +75,37 @@ def make_folder(address):
     if not os.path.exists(address):
         os.mkdir(address)
 # 블럭리스트에서 원하는 속성 추출해서 리스트만들기
-def get_attribute_forlist(elements, wanna_del_err_txt, attri):
+def get_attribute_forlist(elements, wanna_del_err_txt, attri, time):
     attributes = []
     for i in range(len(elements)):
         attribute = elements[i].get_attribute(attri)
-        if wanna_del_err_txt:
-            del_err_txt(attribute)
+        if wanna_del_err_txt == 1:
+            attribute = del_err_txt(attribute)
         attributes.append(attribute)
+        driver.implicitly_wait(time)
     return attributes
-        
-        
+
+def save_picture(address_name, picture):
+    try:
+        ss = requests.get(picture, headers=headers)
+        file = open(address_name, 'wb')
+        file.write(ss.content)
+        file.close()
+    except Exception as e:
+        print('에러발생 :',e)
+
+def save_comments(address):
+    names = driver.find_elements(By.ID, elem_attri['y댓글-이름'][0])
+    texts = driver.find_elements(By.CLASS_NAME, elem_attri['y댓글-텍스트'][0])[1:]
+    for profile in range(len(names)):
+        name_url = names[profile].get_attribute(elem_attri['y댓글-이름'][1])
+        name = name_url.find('/@')
+        name_url = name_url[name + 2:]
+        text = texts[profile].text
+
+        comment_txt = open(f'{address}/{profile}{name_url}.txt', 'w', encoding='UTF-8')
+        comment_txt.write(text)
+        comment_txt.close()
     
 # 크롬 열기
 option = start_chrome()
@@ -97,74 +120,47 @@ recently_uploaded = youtube_choose_category(driver, '최근에 업로드된 동�
 click_block(recently_uploaded)
 
 chaneol_count = int(input("탐색할 채널 개수 입력> "))
-video_count = int(input("채널당 탐색할 영상 개수 입력>"))
+video_count = int(input("채널당 탐색할 영상 개수 입력> "))
 
 chaneol_names = []
 chaneol_sites = []
 # 원하는개수만큼 채널 블럭을 저장
-chaneols = driver.find_elements(By.ID, 'avatar-link')
+chaneols = driver.find_elements(By.ID, elem_attri['y프로필-이름-링크'][0])
 while len(chaneols) < chaneol_count:
     scroll_down(driver, 7)
-    chaneols = driver.find_elements(By.ID, 'avatar-link')
+    chaneols = driver.find_elements(By.ID, elem_attri['y프로필-이름-링크'][0]) 
 # 채널 블럭에서 채널이름, 사이트 추출
-chaneol_names = get_attribute_forlist(chaneols, 1, elems['y프로필-이름-링크'][1])
-chaneol_sites = get_attribute_forlist(chaneols, 0, elems['y프로필-이름-링크'][2])
+chaneol_names = get_attribute_forlist(chaneols[:chaneol_count], 1, elem_attri['y프로필-이름-링크'][1], 0)
+chaneol_sites = get_attribute_forlist(chaneols[:chaneol_count], 0, elem_attri['y프로필-이름-링크'][2], 0)
 for i in range(chaneol_count):
-    make_folder(f"./youtube_thumbnail/{chaneol_names[i]}") #각 채널이름으로 폴더생성
+    make_folder(f"./youtube_thumbnail/{chaneol_names[i]}") # 각 채널이름으로 폴더생성
 
 # 각 채널 썸네일,댓글 가져오기
 for i in range(chaneol_count):
-    open_site(driver, f'{chaneol_sites[i]}/videos')
+    print(i+1, chaneol_names[i])
+    open_site(driver, f'{chaneol_sites[i]}/videos')         # 채널 사이트 접속
     now_file = f"./youtube_thumbnail/{chaneol_names[i]}"
-
-    video = driver.find_elements(By.ID, elems['y영상'][0])
+    
+    video = driver.find_elements(By.ID, elem_attri['y영상'][0])
     while len(video) < video_count:
         scroll_down(driver, 3)
-        video = driver.find_elements(By.ID, elems['y영상'][0])
-
-    titles = []
-    links = []
+        video = driver.find_elements(By.ID, elem_attri['y영상'][0])
+    
+    elems = driver.find_elements(By.CLASS_NAME, elem_attri['y영상-썸네일'][0])[:video_count]
+    title_link = driver.find_elements(By.ID, elem_attri['y영상-제목-링크'][0])[:video_count]
+    
+    thumbnails = get_attribute_forlist(elems, 0, elem_attri['y영상-썸네일'][1], 2)
+    titles = get_attribute_forlist(title_link, 1, elem_attri['y영상-제목-링크'][1], 0)
+    links = get_attribute_forlist(title_link, 0, elem_attri['y영상-제목-링크'][2], 0)
     for video_num in range(video_count):
-        elem = video[video_num].find_element(By.CLASS_NAME, elems['y영상-썸네일'][0])
-        title_link = video[video_num].find_element(By.ID, elems['y영상-제목-링크'][0])
-        #####################################
-        thumbnail = elem.get_attribute(elems['y영상-썸네일'][1])
-        title = title_link.get_attribute(elems['y영상-제목-링크'][1])
-        title = del_err_txt(title)
-        link = title_link.get_attribute(elems['y영상-제목-링크'][2])
-        titles.append(title)
-        links.append(link)
-        print(video_num+1, title)
-        page_folder = f"{now_file}/{title}"
-        if not os.path.exists(page_folder):
-            os.mkdir(page_folder)
-        try:
-            file_name=  f'{now_file}/{title}/{title}.jpg'
-            ss = requests.get(thumbnail, headers=headers)
-            file = open(file_name, 'wb')
-            file.write(ss.content)
-            file.close()
-        except Exception as e:
-            print('에러발생 :',e)
-        time.sleep(1)
-            
-    for li in range(video_count):
-        driver.get(links[li])
-        driver.implicitly_wait(5)
+        open_site(driver, links[video_num])
         for i in range(2):
-            actions = driver.find_element(By.CSS_SELECTOR, 'body')
-            actions.send_keys(Keys.PAGE_DOWN)
-            time.sleep(7)
+            scroll_down(driver, 7)
         time.sleep(10)
-        names = driver.find_elements(By.ID, 'author-text')
-        texts = driver.find_elements(By.CLASS_NAME,'yt-core-attributed-string.yt-core-attributed-string--white-space-pre-wrap')[1:]
-        for profile in range(len(names)):
-            name_url = names[profile].get_attribute('href')
-            name = name_url.find('/@')
-            name_url = name_url[name + 2:]
-            text = texts[profile].text
+        print(video_num+1, titles[video_num])
+        make_folder(f"{now_file}/{titles[video_num]}")
+        save_picture(f'{now_file}/{titles[video_num]}/{titles[video_num]}.jpg', thumbnails[video_num])
+        time.sleep(1)
 
-            comment_txt = open(f"{now_file}/{titles[li]}/{profile}{name_url}.txt", 'w', encoding='UTF-8')
-            comment_txt.write(text)
-            comment_txt.close()
+        save_comments(f"{now_file}/{titles[video_num]}")
     
