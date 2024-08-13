@@ -35,7 +35,7 @@ def start_chrome():
 # 사이트 열기
 def open_site(driver, url):
     driver.get(url)
-    driver.implicitly_wait(3)
+    time.sleep(3)
     return driver
 # 블록 클릭
 def click_block(block):
@@ -89,15 +89,15 @@ def save_picture(address_name, picture):
         print('에러발생 :',e)
 # 원하는 element개수가 로딩될만큼 내리기
 def scroll_untill_load(driver, cnt, elem):
-    elems = driver.find_elements(By.CLASS_NAME, elem)
+    elems = renewal_find_elements(driver, elem)
     while len(elems) < cnt:
         scroll_down(driver, 5)
-        elems = driver.find_elements(By.CLASS_NAME, elem)
+        elems = renewal_find_elements(driver, elem)
     return driver
 # 유튜브 댓글 저장하기
 def save_comments(address):
-    names = driver.find_elements(By.ID, elem_attri['y댓글-이름'][0])
-    texts = driver.find_elements(By.CLASS_NAME, elem_attri['y댓글-텍스트'][0])[1:]
+    names = renewal_find_elements(driver, elem_attri['y댓글-이름'][0])
+    texts = renewal_find_elements(driver, elem_attri['y댓글-텍스트'][0])[1:]
     for profile in range(len(names)):
         name_url = names[profile].get_attribute(elem_attri['y댓글-이름'][1])
         name = name_url.find('/@')
@@ -109,13 +109,42 @@ def save_comments(address):
         comment_txt.close()
 # 원하는 카테고리 들어가기
 def click_category(driver, elem, text):
-    category = driver.find_elements(By.CLASS_NAME, elem)
-    for i in range(len(category)):
-        if category[i].text == text:
-            choosed_category = category[i]
+    category = renewal_find_elements(driver, elem)
+    for i in category:
+        if i.text == text:
+            choosed_category = i
             break
     driver = click_block(choosed_category)
     return driver
+# element 종류 자동으로 찾기
+def renewal_find_elements(driver, value, start=0, end=-1):
+    elements = []
+    By_list = [By.CLASS_NAME, By.ID, By.NAME, By.TAG_NAME]
+    for i in By_list:
+        try:
+            elem = driver.find_elements(i, value)
+        except:
+            elem = []
+        else:
+            elements = elem
+            break
+    if end == 1:
+        return elements[0]
+    return elements[start:end]
+
+def renewal_find_element(driver, value):
+    element = []
+    By_list = [By.CLASS_NAME, By.ID, By.NAME, By.TAG_NAME]
+    for i in By_list:
+        try:
+            elem = driver.find_element(i, value)
+        except:
+            elem = []
+        else:
+            element = elem
+            break
+    return element
+
 
 # 크롬 열기
 driver = start_chrome()
@@ -123,18 +152,24 @@ driver = start_chrome()
 # 치지직 열기
 driver = open_site(driver, 'https://chzzk.naver.com')
 
+# 광고가 있으면 닫기
+if renewal_find_element(driver, 'loungehome_event_popup_main__S7h8c'):
+    del_block = renewal_find_element(driver, 'loungehome_event_popup_button_close__ftfLQ')
+    driver = click_block(del_block)
+
 # 인기클립 카테고리 들어가기
-driver = click_category(driver, 'header_text__SNWKj', '인기 클립')
+driver = click_category(driver, 'header_text__SNWKj', '인기\n클립')
 
 video_count = int(input("탐색할 영상 개수 입력> "))
 scroll_untill_load(driver, video_count, 'navigation_component_item__iMPOI')
-videos = driver.find_elements(By.CLASS_NAME, 'navigation_component_item__iMPOI')
-links = videos[0].find_element(By.TAG_NAME, 'a')
-href = get_attribute_forlist(links, 0, 'href')
+videos = renewal_find_elements(driver, 'navigation_component_item__iMPOI')
+links = []
+for video in videos:
+    link = renewal_find_element(videos, 'a')
+    links.append(link)
 
 for link in links:
     driver = open_site(driver, link)
-
 
 
 
