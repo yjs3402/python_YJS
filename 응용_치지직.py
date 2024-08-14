@@ -158,18 +158,20 @@ if renewal_find_element(driver, 'loungehome_event_popup_main__S7h8c'):
     driver = click_block(del_block)
 
 # 인기클립 카테고리 들어가기
-driver = click_category(driver, 'header_text__SNWKj', '인기\n클립')
+driver = click_category(driver, 'header_text__SNWKj', '인기 클립')
 
 video_count = int(input("탐색할 영상 개수 입력> "))
 scroll_untill_load(driver, video_count, 'navigation_component_item__iMPOI')
-videos = renewal_find_elements(driver, 'navigation_component_item__iMPOI')
+videos = renewal_find_elements(driver, 'navigation_component_item__iMPOI', video_count)
 links = []
+names = []
 for video in videos:
-    link = renewal_find_element(videos, 'a')
+    link = video.find_element(By.TAG_NAME, 'a')
+    name = video.find_element(By.CLASS_NAME, 'clip_card_title__Pc2jc')
     links.append(link)
+    names.append(name)
 
 for link in links:
     driver = open_site(driver, link)
-
 
 
