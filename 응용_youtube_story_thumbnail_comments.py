@@ -89,7 +89,7 @@ def save_picture(address_name, picture):
 # 원하는 element개수가 로딩될만큼 내리기
 def scroll_untill_load(driver, cnt, elem):
     elems = driver.find_elements(By.ID, elem)
-    while len(chaneols) < cnt:
+    while len(channels) < cnt:
         scroll_down(driver, 5)
         elems = driver.find_elements(By.ID, elem)
     return driver
@@ -124,25 +124,25 @@ drive = open_site(driver, 'https://www.youtube.com')
 # '최근에 업로드된 동영상'카테고리에 들어가기
 driver = youtube_choose_category(driver, '최근에 업로드된 동영상')
 
-chaneol_count = int(input("탐색할 채널 개수 입력> "))
+channel_count = int(input("탐색할 채널 개수 입력> "))
 video_count = int(input("채널당 탐색할 영상 개수 입력> "))
 
-chaneol_names = []
-chaneol_sites = []
+channel_names = []
+channel_sites = []
 # 원하는개수만큼 채널 블럭을 저장
-driver = scroll_untill_load(driver, chaneol_count, elem_attri['y프로필-이름-링크'][0])
+driver = scroll_untill_load(driver, channel_count, elem_attri['y프로필-이름-링크'][0])
 # 채널 블럭에서 채널이름, 사이트 추출
-chaneols = driver.find_elements(By.ID, elem)
-chaneol_names = get_attribute_forlist(chaneols[:chaneol_count], 1, elem_attri['y프로필-이름-링크'][1])
-chaneol_sites = get_attribute_forlist(chaneols[:chaneol_count], 0, elem_attri['y프로필-이름-링크'][2])
-for i in range(chaneol_count):
-    make_folder(f"./youtube_thumbnail/{chaneol_names[i]}") # 각 채널이름으로 폴더생성
+channels = driver.find_elements(By.ID, elem)
+channel_names = get_attribute_forlist(channels[:channel_count], 1, elem_attri['y프로필-이름-링크'][1])
+channel_sites = get_attribute_forlist(channels[:channel_count], 0, elem_attri['y프로필-이름-링크'][2])
+for i in range(channel_count):
+    make_folder(f"./youtube_thumbnail/{channel_names[i]}") # 각 채널이름으로 폴더생성
 
 # 각 채널 썸네일,댓글 가져오기
-for i in range(chaneol_count):
-    print(i+1, chaneol_names[i])
-    driver = open_site(driver, f'{chaneol_sites[i]}/videos')         # 채널 사이트 접속
-    now_file = f"./youtube_thumbnail/{chaneol_names[i]}"
+for i in range(channel_count):
+    print(i+1, channel_names[i])
+    driver = open_site(driver, f'{channel_sites[i]}/videos')         # 채널 사이트 접속
+    now_file = f"./youtube_thumbnail/{channel_names[i]}"
 
     driver = scroll_untill_load(driver, video_count, elem_attri['y영상'][0])
     
