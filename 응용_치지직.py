@@ -31,11 +31,11 @@ def start_chrome():
     option = Options()
     option.add_experimental_option("debuggerAddress", "127.0.0.1:9222")
     driver = webdriver.Chrome(options=option)
-    return driver
+    return driver, headers
 # 사이트 열기
 def open_site(driver, url):
     driver.get(url)
-    time.sleep(3)
+    driver.implicitly_wait(3)
     return driver
 # 블록 클릭
 def click_block(block):
@@ -50,17 +50,17 @@ def del_err_txt(name):
             name = name.replace(k, "")
     return name
 # 현재 페이지에서 스크롤 내리기(몇초 기다리기)
-def scroll_down(drvier, time):
+def scroll_down(drvier, sec):
     actions = driver.find_element(By.CSS_SELECTOR, 'body')
     actions.send_keys(Keys.PAGE_DOWN)
-    driver.implicitly_wait(time)
+    driver.implicitly_wait(sec)
 # 페이지 맨 아래로 스크롤 내리기(중간중간 몇초 기다리기)
-def scroll_to_end(driver, time):
+def scroll_to_end(driver, sec):
     actions = driver.find_element(By.CSS_SELECTOR, 'body')
     before_h = browser.execute_script("return window.scrollY")
     while True:
         actions.send_keys(Keys.PAGE_DOWN)
-        driver.implicitly_wait(time)
+        driver.implicitly_wait(sec)
         after_h = browser.execute_script("return window.scrollY")
         if after_h == before_h:
             return
@@ -79,7 +79,7 @@ def get_attribute_forlist(elements, wanna_del_err_txt, attri):
         attributes.append(attribute)
     return attributes
 # 이미지 저장하기
-def save_picture(address_name, picture):
+def save_picture(address_name, picture, headers):
     try:
         ss = requests.get(picture, headers=headers)
         file = open(address_name, 'wb')
@@ -117,12 +117,12 @@ def click_category(driver, elem, text):
     driver = click_block(choosed_category)
     return driver
 # element 종류 자동으로 찾기
-def renewal_find_elements(driver, value, start=0, end=-1):
+def renewal_find_elements(drive, value, start=0, end=-1):
     elements = []
     By_list = [By.CLASS_NAME, By.ID, By.NAME, By.TAG_NAME]
     for i in By_list:
         try:
-            elem = driver.find_elements(i, value)
+            elem = drive.find_elements(i, value)
         except:
             elem = []
         else:
@@ -132,12 +132,12 @@ def renewal_find_elements(driver, value, start=0, end=-1):
         return elements[0]
     return elements[start:end]
 
-def renewal_find_element(driver, value):
+def renewal_find_element(drive, value):
     element = []
     By_list = [By.CLASS_NAME, By.ID, By.NAME, By.TAG_NAME]
     for i in By_list:
         try:
-            elem = driver.find_element(i, value)
+            elem = drive.find_element(i, value)
         except:
             elem = []
         else:
@@ -147,7 +147,7 @@ def renewal_find_element(driver, value):
 
 
 # 크롬 열기
-driver = start_chrome()
+driver, headers = start_chrome()
 
 # 치지직 열기
 driver = open_site(driver, 'https://chzzk.naver.com')
@@ -157,21 +157,36 @@ if renewal_find_element(driver, 'loungehome_event_popup_main__S7h8c'):
     del_block = renewal_find_element(driver, 'loungehome_event_popup_button_close__ftfLQ')
     driver = click_block(del_block)
 
-# 인기클립 카테고리 들어가기
-driver = click_category(driver, 'header_text__SNWKj', '인기 클립')
+# 전체방송 카테고리 들어가기
+driver = click_category(driver, 'header_text__SNWKj', '인기\n클립')
 
+channel_count = int(input("탐색할 채널 개수 입력> "))
 video_count = int(input("탐색할 영상 개수 입력> "))
 scroll_untill_load(driver, video_count, 'navigation_component_item__iMPOI')
-videos = renewal_find_elements(driver, 'navigation_component_item__iMPOI', video_count)
+videos = driver.find_elements(By.CLASS_NAME, 'navigation_component_item__iMPOI')
+print(len(videos))
+videos = videos[:video_count]
 links = []
 names = []
+images = []
 for video in videos:
-    link = video.find_element(By.TAG_NAME, 'a')
-    name = video.find_element(By.CLASS_NAME, 'clip_card_title__Pc2jc')
+    link_block = video.find_element(By.TAG_NAME, 'a')
+    link = link_block.get_attribute('href')
+    
+    name = video.find_element(By.CLASS_NAME, 'clip_card_title__Pc2jc').text
+    name = del_err_txt(name)
+    
+    image_block = video.find_element(By.CLASS_NAME, 'clip_card_container__aoMWB')
+    image = image_block.get_attribute('style')
+    image_begin = image.find('background-image: url("') + len('background-image: url("')
+    image_end = image.find('");"')
+    image = image[image_begin : image_end]
+    
     links.append(link)
     names.append(name)
+    images.append(image)
 
-for link in links:
-    driver = open_site(driver, link)
-
-
+for link in range(len(links)):
+    driver = open_site(driver, links[link])
+    save_picture(f'./치지직_클립/{link + 1} {names[link]}.jpg', images[link], headers)
+    
