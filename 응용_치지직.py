@@ -158,7 +158,9 @@ if renewal_find_element(driver, 'loungehome_event_popup_main__S7h8c'):
     driver = click_block(del_block)
 
 # 전체방송 카테고리 들어가기
-driver = click_category(driver, 'header_text__SNWKj', '인기\n클립')
+driver = click_category(driver, 'header_text__SNWKj', '전체\n방송')
+# 다시보기 카테고리 들어가기
+driver = click_category(driver, 'tab_item__8mCoC', '다시보기')
 
 channel_count = int(input("탐색할 채널 개수 입력> "))
 video_count = int(input("탐색할 영상 개수 입력> "))
@@ -170,17 +172,14 @@ links = []
 names = []
 images = []
 for video in videos:
-    link_block = video.find_element(By.TAG_NAME, 'a')
+    link_block = video.find_element(By.CLASS_NAME, 'video_card_thumbnail__QXYT8')
     link = link_block.get_attribute('href')
     
     name = video.find_element(By.CLASS_NAME, 'clip_card_title__Pc2jc').text
     name = del_err_txt(name)
     
-    image_block = video.find_element(By.CLASS_NAME, 'clip_card_container__aoMWB')
-    image = image_block.get_attribute('style')
-    image_begin = image.find('background-image: url("') + len('background-image: url("')
-    image_end = image.find('");"')
-    image = image[image_begin : image_end]
+    image_block = video.find_element(By.CLASS_NAME, 'video_card_image__yHXqv')
+    image = image_block.get_attribute('src')
     
     links.append(link)
     names.append(name)
